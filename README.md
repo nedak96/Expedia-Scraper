@@ -55,4 +55,4 @@ Departure   Arrival     Price       Duration
    1:00am      4:00pm      + $194      27h 0m     
    9:30pm      10:30pm+1   + $439      37h 0m     
    10:35am     8:35pm      + $528      22h 0m     
-   4:55am      2:25pm      + $568      21h 30m```
+   4:55am      2:25pm      + $568      21h 30m
