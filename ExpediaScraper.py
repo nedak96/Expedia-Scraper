@@ -27,8 +27,9 @@ def get_url(args):
 	destination_airport = args.destination_airport
 	departure_date = args.departure_date
 	return_date = args.return_date
-	num_children = 0
-	num_adults = 1
+	num_children = args.children
+	num_adults = args.adults
+	is_round_trip = False
 
 	params = {
 		"mode": "search",
@@ -36,6 +37,7 @@ def get_url(args):
 		"passengers": "children:"+str(num_children)+",adults:"+str(num_adults)
 	}
 	if return_date:
+		is_round_trip = True
 		params["trip"] = "roundtrip"
 		params["leg2"] = "from:"+destination_airport+",to:"+departure_airport+",departure:"+return_date+"TANYT"
 		print("Checking round trip flights from " + departure_airport + " to " + destination_airport + " from " + departure_date + " to " + return_date)
@@ -43,7 +45,7 @@ def get_url(args):
 		params["trip"] = "oneway"
 		print("Checking one-way flights from " + departure_airport + " to " + destination_airport + " on " + departure_date)
 
-	return "https://www.expedia.com/Flights-Search?" + urllib.urlencode(params)
+	return "https://www.expedia.com/Flights-Search?" + urllib.urlencode(params), is_round_trip
 
 def get_flights(driver, url, is_round_trip, is_return_flight = False):
 	driver.get("about:blank")
@@ -84,23 +86,23 @@ def get_flights(driver, url, is_round_trip, is_return_flight = False):
 
 if __name__=="__main__":
 	argparser = ArgumentParser()
-	argparser.add_argument('departure_airport',help = 'Departure airport code')
-	argparser.add_argument('destination_airport',help = 'Destination airport code')
-	argparser.add_argument('departure_date',help = 'MM/DD/YYYY')
-	argparser.add_argument('return_date',help = 'MM/DD/YYYY',nargs='?',default="")
-	args = argparser.parse_args()
+	argparser.add_argument('departure_airport', help='Departure airport code')
+	argparser.add_argument('destination_airport', help='Destination airport code')
+	argparser.add_argument('departure_date', help='MM/DD/YYYY')
+	argparser.add_argument('return_date', help='MM/DD/YYYY',nargs='?', default="")
+	argparser.add_argument('-a', '--adults', help='Number of adults: default 1', default=1)
+	argparser.add_argument('-c', '--children', help='Number of adults: default 0', default=0)
 
-	url = get_url(args)
+	url, is_round_trip = get_url(argparser.parse_args())
 
 	opts = Options()
 	opts.set_headless()
 	driver = Firefox(options=opts)
 
 	print("Departure   Arrival     Price       Duration   ")
-	if args.return_date:
+	if is_round_trip:
 		print("-> Return Flight Details")
-		get_flights(driver, url, True)
-	else:
-		get_flights(driver, url, False)
+
+	get_flights(driver, url, is_round_trip)
 
 	driver.close()
